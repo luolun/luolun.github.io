@@ -1,0 +1,102 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <!-- <script src="http://localhost:8098"></script> -->
+</head>
+
+<body>
+    <div id="app">
+        <h1>离开地球所需燃料计算器(不考虑重力以外的阻力)</h1>
+        <div>
+            <p>公式：
+                <latex expression="\frac {G m_e m_s}{r_f R - G m_e}"></latex>
+            </p>
+            其中
+            <latex expression="m_s"></latex>
+            为飞船重量,
+            <latex expression="r_f"></latex>
+            为单位质量燃料能产生的可利用能量
+        </div>
+        <div>
+            <p>参数：</p>
+            <p>
+                <latex :expression=" 'G=' + G + 'N·m^2/kg^2' "></latex>
+            </p>
+            <p>
+                <latex :expression=" 'R=' +  R / 1000 + 'km' "></latex>
+            </p>
+            <p>
+                <latex :expression=" 'm_e=' + m_e + 'kg' "></latex>
+            </p>
+            <p>
+                <latex expression="m_s "></latex>=
+                <input type="number " v-model="m_s " /> kg
+            </p>
+            <p>
+                <latex expression="r_f "></latex>=
+                <input type="number " v-model="r_f " /> J/kg
+            </p>
+            <p>结果：</p>
+            <p>
+                {{ m_0 }} kg
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js "></script>
+    <script>
+        var latexNode = {
+            props: ['expression'],
+            template: `
+				<img :src=" 'http://latex.codecogs.com/gif.latex?' + expression " />
+			`
+        };
+
+        var app = new Vue({
+            el: "#app ",
+            data: function() {
+                return {
+                    m_s: 0, // 飞船质量
+                    r_f: 0, // 单位质量燃料产生的能量,
+
+                    m_e: 5.965e-24, // 地球质量
+                    R: 6371 * 1000, // 地球半径
+                    G: 6.67259e-11, // 万有引力常量
+                };
+            },
+            computed: {
+                // m_0:要携带的燃料质量
+                m_0: function() {
+                    var m_e = this.m_e;
+                    var m_s = this.m_s;
+                    var r_f = this.r_f;
+                    var G = this.G;
+                    var R = this.R;
+                    // \frac {G m_e m_s}{r_f R - G m_e}
+                    return G * m_e * m_s / (r_f * R - G * m_e);
+                },
+            },
+            components: {
+                "latex": latexNode
+            }
+        });
+
+        /* function parseLatex(rootElement) {
+            if (!(rootElement instanceof HTMLElement)) return;
+            for (var childIndex = 0; childIndex < rootElement.children.length; childIndex++) {
+                var child = rootElement.children[childIndex];
+                if (child.tagName == "LATEX ") {
+                    // TODO: Add a flag to check if an element has been parsed.
+                    child.innerHTML = '<img src="http://latex.codecogs.com/gif.latex? ' + child.textContent + ' " />';
+                } else {
+                    parseLatex(child);
+                }
+            }
+        }
+
+        parseLatex(document.body); */
+    </script>
+</body>
+
+</html>
