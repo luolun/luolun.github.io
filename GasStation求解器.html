@@ -1,0 +1,150 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+</head>
+
+<body>
+    <style>
+        .circle {
+            position: absolute;
+            top: 191px;
+            left: -9px;
+            border: 1px solid #000;
+            border-radius: 50%;
+            background: #fff;
+        }
+    </style>
+    <div>
+        请输入加油站个数
+        <input type="number" onchange="stationNumberChanged(event)">
+    </div>
+    <div id="gasGeneration">
+        <input type="button" value="随机生成加油站油量" onclick="generateGas()">
+        <!-- <input type="button" value="输入加油站油量" onclick="inputGas()"> -->
+    </div>
+    <input id="resetButton" type="button" value="重新输入" onclick="reset()" style="display: none;">
+    <div id="gasStationValueList" style="display: none">
+
+    </div>
+
+    <div id="canvas" style="position: relative;"></div>
+
+    <script>
+        var PI = 3.131592657;
+
+        var hasGenerateGas;
+        var gasArray = [];
+        var costArray = []; // 从当前加油站到下一个加油站消耗的油量
+        var gasStationNumber = 0;
+
+        var gasGenerationDiv = document.querySelector("#gasGeneration");
+        var gasStationValueListDiv = document.querySelector("#gasStationValueList");
+        var canvasDiv = document.querySelector("#canvas");
+        var resetButton = document.querySelector("#resetButton");
+
+        var canvasRadius = 200;
+        var canvasWidth, canvasHeight;
+        canvasWidth = canvasHeight = canvasRadius * 2;
+
+        canvasDiv.style.width = canvasWidth + 'px';
+        canvasDiv.style.height = canvasHeight + 'px';
+        canvasDiv.style.left = canvasWidth + 'px';
+        canvasDiv.style.top = canvasHeight + 'px';
+
+        function generateGas() {
+            gasArray = [];
+            costArray = [];
+            for (var i = 0; i < gasStationNumber; i++) {
+                gasArray.push(Number.parseInt(Math.random() * 100));
+                costArray.push(Number.parseInt(Math.random() * 100));
+            }
+            submitGas();
+        }
+
+        function inputGas() {
+            hide(gasGenerationDiv);
+            show(gasStationValueListDiv);
+
+            gasArray = [];
+            costArray = [];
+            for (var i = 0; i < gasStationNumber; i++) {
+                gasArray.push(0);
+                costArray.push(0);
+            }
+        }
+
+        function showGas() {
+            // gasStationValueListDiv.innerHTML = '';
+            var gasStationListHtml = '';
+            for (var i = 0; i < gasStationNumber; i++) {
+                gasStationListHtml += `
+				<div>
+					<div>序号：${i}</div>
+					油量:<input class="stationArgument" type="number" onchange="stationIntoChange(event, ${i}, 'gas')"/>
+					消耗:<input class="stationArgument" type="number" onchange="stationIntoChange(event, ${i}, 'cost')"/>
+				</div>`
+                    .replace("${i}", i);
+            }
+            gasStationListHtml += '<div><input type="button" value="确定" onclick="submitGas()"></div>'
+            gasStationValueListDiv.innerHTML = gasStationListHtml;
+        }
+
+        function stationIntoChange(event, index, infoKey) {
+            if (infoKey == "gas") {
+                gasArray[index] = Number.parseInt(event.target.value);
+            } else {
+                costArray[index] = Number.parseInt(event.target.value);
+            }
+        }
+
+        function submitGas() {
+            // hide(gasGenerationDiv);
+            hide(gasStationValueListDiv);
+            // show(resetButton);
+            drawStation();
+        }
+
+        function reset() {
+            hide(resetButton);
+            show(gasGenerationDiv);
+        }
+
+        // value binding
+        function stationNumberChanged(event) {
+            gasStationNumber = Number.parseInt(event.target.value);
+        }
+
+        function drawStation() {
+            var stationsHtml = '';
+            var deltaAngle = 2 * PI / gasArray.length;
+            var r = canvasRadius; // length unit is pixel
+            var distance = r * Math.sin(deltaAngle / 2) * 2;
+            // var stationRadius = distance * 2 / 3;
+            var stationRadius = 10;
+            for (var i = 0; i < gasArray.length; i++) {
+                var x = r * Math.cos(deltaAngle * i);
+                var y = r * Math.sin(deltaAngle * i);
+
+                var top = y - stationRadius;
+                var left = x - stationRadius;
+                stationsHtml += `<div style="height: ${stationRadius}; width: ${stationRadius}; top: ${top}; left: ${left};" class="circle"></div>`
+                    .replace('${stationRadius}', stationRadius)
+                    .replace("${top}", top)
+                    .replace("${left}", left);
+            }
+            canvasDiv.innerHTML = stationsHtml;
+        }
+
+        // -- view utils
+        function hide(dom) {
+            dom.style.display = 'none';
+        }
+
+        function show(dom) {
+            dom.style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
