@@ -34,13 +34,14 @@
         <input id="resetButton" type="button" value="重新输入" onclick="reset()" style="display: none;">
         <input id="nextStepButton" type="button" value="下一步" onclick="nextStep()">
         <div id="statusDiv">
-            <p>当前油量:<span id="remaningGasValue"></span></p>
             <p>当前车站:<span id="nowStationIndex"></span></p>
+            <p>当前出发车站:<span id="startStationIndexSpan"></span></p>
+            <p>当前油量:<span id="remaningGasValue"></span></p>
             <p>当前车站可加油量:<span id="nowStationGasValue"></span></p>
             <p>当前车站到下一车站耗油量:<span id="costToNextStation"></span></p>
         </div>
         <div id="failMessageDiv" style="display: none; color: red;">
-            已不能继续前进!
+            已经尝试过所有始发站，该组数据不能支持小车绕一圈!
         </div>
         <div id="gasStationValueList" style="display: none">
 
@@ -56,6 +57,7 @@
         var gasArray = [];
         var costArray = []; // 从当前加油站到下一个加油站消耗的油量
         var gasStationNumber = 0;
+        var success = false;
 
         var gasGenerationDiv = document.querySelector("#gasGeneration");
         var gasStationValueListDiv = document.querySelector("#gasStationValueList");
@@ -63,10 +65,12 @@
         var resetButton = document.querySelector("#resetButton");
 
         // -- status elements
+        // variable elements
         var remaningGasValueSpan = document.querySelector("#remaningGasValue");
         var nowStationIndexSpan = document.querySelector("#nowStationIndex");
         var nowStationGasValueSpan = document.querySelector("#nowStationGasValue");
         var costToNextStationSpan = document.querySelector("#costToNextStation");
+        var startStationIndexSpan = document.querySelector("#startStationIndexSpan");
 
         var canvasRadius = 200;
         var canvasWidth, canvasHeight;
@@ -77,7 +81,7 @@
         canvasDiv.style.left = canvasWidth + 'px';
         canvasDiv.style.top = canvasHeight + 'px';
 
-        var startStation = 0;
+        var startStationIndex = 0;
         var nowStationIndex = 0;
         var remainingGas = 0;
 
@@ -142,14 +146,26 @@
         }
 
         function nextStep() {
-            if (remainingGas < 0) {
-                show(failMessageDiv);
+            if (success == true) {
+                alert("成功!");
+            } else if (remainingGas < 0) {
+                remainingGas = 0;
+                startStationIndex++;
+                if (startStationIndex >= gasArray.length) {
+                    show(failMessageDiv);
+                } else {
+                    hide(failMessageDiv);
+                    nowStationIndex = startStationIndex;
+                }
             } else {
                 hide(failMessageDiv);
-                remainingGas += gas[nowStationIndex] - cost[nowStationIndex];
-                nowStationIndex++;
-                drawStations();
+                remainingGas += gasArray[nowStationIndex] - costArray[nowStationIndex];
+                nowStationIndex = (nowStationIndex + 1) % gasArray.length;
+                if (nowStationIndex == startStationIndex) {
+                    success = true;
+                }
             }
+            drawStations();
         }
 
         // -- value binding
@@ -225,6 +241,7 @@
             nowStationIndexSpan.textContent = nowStationIndex;
             nowStationGasValueSpan.textContent = gasArray[nowStationIndex];
             costToNextStationSpan.textContent = costArray[nowStationIndex];
+            startStationIndexSpan.textContent = startStationIndex;
         }
 
         // -- view utils
