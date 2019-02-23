@@ -16,11 +16,11 @@
         }
     </style>
     <div>
-        请输入加油站个数
-        <input type="number" onchange="stationNumberChanged(event)">
+        请输入加油站的个数
+        <input type="number" onkeyup="stationNumberChanged(event)">
     </div>
     <div id="gasGeneration">
-        <input type="button" value="随机生成加油站油量" onclick="generateGas()">
+        <!-- <input type="button" value="随机生成加油站油量" onclick="generateGas()"> -->
         <!-- <input type="button" value="输入加油站油量" onclick="inputGas()"> -->
     </div>
     <input id="resetButton" type="button" value="重新输入" onclick="reset()" style="display: none;">
@@ -110,10 +110,13 @@
             show(gasGenerationDiv);
         }
 
-        // value binding
+        // -- value binding
         function stationNumberChanged(event) {
             gasStationNumber = Number.parseInt(event.target.value);
+            generateGas();
         }
+
+        // -- rendering
 
         function drawStation() {
             var stationsHtml = '';
