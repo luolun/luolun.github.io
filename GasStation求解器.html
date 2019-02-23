@@ -12,7 +12,14 @@
             left: -9px;
             border: 1px solid #000;
             border-radius: 50%;
+        }
+        
+        .whiteBackground {
             background: #fff;
+        }
+        
+        .blackBackground {
+            background: #000;
         }
     </style>
     <div>
@@ -24,6 +31,16 @@
         <!-- <input type="button" value="输入加油站油量" onclick="inputGas()"> -->
     </div>
     <input id="resetButton" type="button" value="重新输入" onclick="reset()" style="display: none;">
+    <input id="nextStepButton" type="button" value="下一步" onclick="nextStep()">
+    <div id="statusDiv">
+        <p>当前油量:<span id="remaningGasValue"></span></p>
+        <p>当前车站:<span id="nowStationIndex"></span></p>
+        <p>当前车站可加油量:<span id="nowStationGasValue"></span></p>
+        <p>当前车站到下一车站耗油量:<span id="costToNextStation"></span></p>
+    </div>
+    <div id="failMessageDiv" style="display: none; color: red;">
+        已不能继续前进!
+    </div>
     <div id="gasStationValueList" style="display: none">
 
     </div>
@@ -43,6 +60,12 @@
         var canvasDiv = document.querySelector("#canvas");
         var resetButton = document.querySelector("#resetButton");
 
+        // -- status elements
+        var remaningGasValueSpan = document.querySelector("#remaningGasValue");
+        var nowStationIndexSpan = document.querySelector("#nowStationIndex");
+        var nowStationGasValueSpan = document.querySelector("#nowStationGasValue");
+        var costToNextStationSpan = document.querySelector("#costToNextStation");
+
         var canvasRadius = 200;
         var canvasWidth, canvasHeight;
         canvasWidth = canvasHeight = canvasRadius * 2;
@@ -51,6 +74,12 @@
         canvasDiv.style.height = canvasHeight + 'px';
         canvasDiv.style.left = canvasWidth + 'px';
         canvasDiv.style.top = canvasHeight + 'px';
+
+        var startStation = 0;
+        var nowStationIndex = 0;
+        var remainingGas = 0;
+
+        // -- events
 
         function generateGas() {
             gasArray = [];
@@ -102,12 +131,23 @@
             // hide(gasGenerationDiv);
             hide(gasStationValueListDiv);
             // show(resetButton);
-            drawStation();
+            drawStations();
         }
 
         function reset() {
             hide(resetButton);
             show(gasGenerationDiv);
+        }
+
+        function nextStep() {
+            if (remainingGas < 0) {
+                show(failMessageDiv);
+            } else {
+                hide(failMessageDiv);
+                remainingGas += gas[nowStationIndex] - cost[nowStationIndex];
+                nowStationIndex++;
+                drawStations();
+            }
         }
 
         // -- value binding
@@ -118,25 +158,70 @@
 
         // -- rendering
 
-        function drawStation() {
+        function drawStations() {
+            updateStatusValue();
             var stationsHtml = '';
             var deltaAngle = 2 * PI / gasArray.length;
             var r = canvasRadius; // length unit is pixel
             var distance = r * Math.sin(deltaAngle / 2) * 2;
             // var stationRadius = distance * 2 / 3;
             var stationRadius = 10;
-            for (var i = 0; i < gasArray.length; i++) {
-                var x = r * Math.cos(deltaAngle * i);
-                var y = r * Math.sin(deltaAngle * i);
+            for (var stationIndex = 0; stationIndex < gasArray.length; stationIndex++) {
+                var x = r * Math.cos(deltaAngle * stationIndex - PI / 2);
+                var y = r * Math.sin(deltaAngle * stationIndex - PI / 2);
+
+                var stationDetailX = (r + 1.5 * stationRadius) * Math.cos(deltaAngle * stationIndex - PI / 2);
+                var stationDetailY = (r + 1.5 * stationRadius) * Math.sin(deltaAngle * stationIndex - PI / 2);
 
                 var top = y - stationRadius;
                 var left = x - stationRadius;
-                stationsHtml += `<div style="height: ${stationRadius}; width: ${stationRadius}; top: ${top}; left: ${left};" class="circle"></div>`
-                    .replace('${stationRadius}', stationRadius)
-                    .replace("${top}", top)
-                    .replace("${left}", left);
+                var circleColorClass = (stationIndex == nowStationIndex) ? "blackBackground" : "whiteBackground";
+                stationsHtml += `
+					<div style="height: ${stationRadius}; 
+								width: ${stationRadius}; 
+								top: ${top}; 
+								left: ${left};" 
+						class="circle ${circleColorClass}">
+					</div>
+				`;
+
+                var stationDetailHtml = `
+				<p>车站可用油量:${gasArray[stationIndex]}</p>
+				<p>到下一个站耗油量:${costArray[stationIndex]}</p>
+				`;
+                // top: ${stationDetailY}; left: ${stationDetailX};
+                var stationDetailDom = document.createElement('div');
+                stationDetailDom.style.position = 'absolute';
+                stationDetailDom.innerHTML = stationDetailHtml;
+                var stationDetailDomWidth = getDomSize(stationDetailDom).width;
+                var stationDetailDomHeight = getDomSize(stationDetailDom).height;
+                if (stationDetailX < 0) {
+                    stationDetailDom.style.left = stationDetailX - stationDetailDomWidth;
+                } else {
+                    stationDetailDom.style.left = stationDetailX;
+                }
+                if (stationDetailY < 0) {
+                    stationDetailDom.style.top = stationDetailY - stationDetailDomHeight;
+                } else {
+                    stationDetailDom.style.top = stationDetailY;
+                }
+
+                stationsHtml += stationDetailDom.outerHTML;
             }
+            // for debug
+            stationsHtml += `
+			<div style="left: 0; top: 0; width: 1px; height: 1px;" class="circle blackBackground">
+				原点
+			</div>`;
+            // for debug end
             canvasDiv.innerHTML = stationsHtml;
+        }
+
+        function updateStatusValue() {
+            remaningGasValueSpan.textContent = remainingGas;
+            nowStationIndexSpan.textContent = nowStationIndex;
+            nowStationGasValueSpan.textContent = gasArray[nowStationIndex];
+            costToNextStationSpan.textContent = costArray[nowStationIndex];
         }
 
         // -- view utils
@@ -146,6 +231,17 @@
 
         function show(dom) {
             dom.style.display = 'block';
+        }
+
+        function getDomSize(dom) {
+            document.body.appendChild(dom);
+            var width = dom.offsetWidth;
+            var height = dom.offsetHeight;
+            document.body.removeChild(dom);
+            return {
+                width: width,
+                height: height
+            }
         }
     </script>
 </body>
