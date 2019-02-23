@@ -22,27 +22,29 @@
             background: #000;
         }
     </style>
-    <div>
-        请输入加油站的个数
-        <input type="number" onkeyup="stationNumberChanged(event)">
-    </div>
-    <div id="gasGeneration">
-        <!-- <input type="button" value="随机生成加油站油量" onclick="generateGas()"> -->
-        <!-- <input type="button" value="输入加油站油量" onclick="inputGas()"> -->
-    </div>
-    <input id="resetButton" type="button" value="重新输入" onclick="reset()" style="display: none;">
-    <input id="nextStepButton" type="button" value="下一步" onclick="nextStep()">
-    <div id="statusDiv">
-        <p>当前油量:<span id="remaningGasValue"></span></p>
-        <p>当前车站:<span id="nowStationIndex"></span></p>
-        <p>当前车站可加油量:<span id="nowStationGasValue"></span></p>
-        <p>当前车站到下一车站耗油量:<span id="costToNextStation"></span></p>
-    </div>
-    <div id="failMessageDiv" style="display: none; color: red;">
-        已不能继续前进!
-    </div>
-    <div id="gasStationValueList" style="display: none">
+    <div id="toolPanel" style="position: fixed; right: 0px;">
+        <div>
+            请输入加油站的个数
+            <input type="number" onkeyup="stationNumberChanged(event)">
+        </div>
+        <div id="gasGeneration">
+            <!-- <input type="button" value="随机生成加油站油量" onclick="generateGas()"> -->
+            <!-- <input type="button" value="输入加油站油量" onclick="inputGas()"> -->
+        </div>
+        <input id="resetButton" type="button" value="重新输入" onclick="reset()" style="display: none;">
+        <input id="nextStepButton" type="button" value="下一步" onclick="nextStep()">
+        <div id="statusDiv">
+            <p>当前油量:<span id="remaningGasValue"></span></p>
+            <p>当前车站:<span id="nowStationIndex"></span></p>
+            <p>当前车站可加油量:<span id="nowStationGasValue"></span></p>
+            <p>当前车站到下一车站耗油量:<span id="costToNextStation"></span></p>
+        </div>
+        <div id="failMessageDiv" style="display: none; color: red;">
+            已不能继续前进!
+        </div>
+        <div id="gasStationValueList" style="display: none">
 
+        </div>
     </div>
 
     <div id="canvas" style="position: relative;"></div>
