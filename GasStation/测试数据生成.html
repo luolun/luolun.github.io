@@ -1,0 +1,36 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+</head>
+
+<body>
+    <input type="button" onclick="generate()" value="生成">
+    <div id="outputDiv"></div>
+    <script>
+        var MIN_NUM = 7,
+            MAX_NUM = 20;
+        var MIN_VALUE = -30,
+            MAX_VALUE = 30;
+
+        function generate() {
+            var stationNum = Number.parseInt(MIN_NUM + Math.random() * (MAX_NUM - MIN_NUM));
+
+            var output;
+            var sum;
+            do {
+                sum = 0;
+                output = [];
+                for (var i = 0; i < stationNum; i++) {
+                    var aValue = Number.parseInt(MIN_VALUE + Math.random() * (MAX_VALUE - MIN_VALUE));
+                    output.push(aValue);
+                    sum += aValue;
+                }
+            } while (sum < 0);
+
+            document.querySelector("#outputDiv").textContent = output;
+        }
+    </script>
+</body>
+
+</html>
