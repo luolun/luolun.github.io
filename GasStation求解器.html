@@ -21,8 +21,22 @@
         .blackBackground {
             background: #000;
         }
+        
+        #toolPanel {
+            position: fixed;
+            right: 0px;
+            border-radius: 10px;
+            background-color: rgb(255, 201, 101);
+            padding: 10px;
+        }
+        
+        #nextStepButton {
+            background-color: rgb(5, 206, 255);
+            border-style: unset;
+            border-radius: 5px;
+        }
     </style>
-    <div id="toolPanel" style="position: fixed; right: 0px;">
+    <div id="toolPanel">
         <div>
             请输入加油站的个数
             <input type="number" onkeyup="stationNumberChanged(event)">
